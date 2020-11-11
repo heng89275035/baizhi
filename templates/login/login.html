@@ -1,0 +1,177 @@
+{% load static %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>百知Python课程管理系统-登录</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <script src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+    <script>
+
+        function submit2() {
+            var user_error = document.getElementsByClassName('user_error')[0]
+            var user11 = document.getElementsByName('username')[0].value
+            var pwd11 = document.getElementsByName('pwd')[0].value
+            var pwd_error = document.getElementsByClassName('pwd_error')[0]
+            console.log(55555)
+
+            if (user11 === '') {
+                user_error.innerHTML = '用户名不能为空'
+                user_error.style.display = 'inline-block'
+            }
+            if (pwd11 === '') {
+                pwd_error.innerHTML = '密码不能为空'
+                pwd_error.style.display = 'inline-block'
+                return 1
+            }
+
+
+            if (user_error.innerHTML === '格式正确' && pwd_error.innerHTML === '格式正确') {
+                $.ajax({
+                    type: 'post',
+                    url: '{% url 'login:login_in' %}',
+                    data: "csrfmiddlewaretoken={{ csrf_token }}&" + $('.form1').serialize(),
+                    success: function (resp) {
+                        console.log(resp)
+                        if (resp === '仅密码错误') {
+                            {#仅密码错误#}
+                            pwd_error.innerHTML = '密码错误'
+                            pwd_error.style.display = 'inline-block'
+                        } else if (resp === '仅账号错误') {
+                            user_error.innerHTML = '账号错误'
+                            user_error.style.display = 'inline-block'
+                        } else if (resp === '账号密码都错') {
+                            pwd_error.innerHTML = '密码错误'
+                            pwd_error.style.display = 'inline-block'
+                            user_error.innerHTML = '账号错误'
+                            user_error.style.display = 'inline-block'
+                        } else if (resp === '1') {
+                            location.href = '{% url 'manage:index' %}'
+                        } else if (resp === '2') {
+                            if (confirm("您的账号未被激活，点击确定将再次激活，取消则返回")) {
+                                again_active()
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
+                    }
+                })
+
+            }
+
+
+        }
+
+        function again_active() {
+            $.ajax({
+                type: 'post',
+                url: '{% url 'login:again_active' %}',
+                data: "csrfmiddlewaretoken={{ csrf_token }}&" + $('.form1').serialize(),
+                success: function (resp) {
+                    if (resp === '1') {
+                        alert('再次激活中，请耐心等待管理员审批')
+                    } else if (resp === '0') {
+                        alert('您的账号密码未被注册')
+                    }
+
+                }
+            })
+        }
+
+        function checkname1(t) {
+            var content = t.value
+            var tip = document.getElementsByClassName('user_error')[0]
+            var namegeshi = /^[\u4E00-\u9FA5]{2,10}$/
+            var result = namegeshi.test(content)
+            if (result) {
+                tip.innerHTML = '格式正确'
+                tip.style.display = 'none'
+
+            } else if (content === '') {
+                tip.innerHTML = '用户名不能为空'
+                tip.style.display = 'inline-block'
+            } else {
+                tip.innerHTML = '请输入2-10位中文名称的用户名'
+                tip.style.display = 'inline-block'
+
+            }
+        }
+
+        function checkpwd1(t) {
+            var content = t.value
+            var tip = document.getElementsByClassName('pwd_error')[0]
+            var pwdgeshi = /^(\w){6,20}$/
+            var result = pwdgeshi.test(content)
+            if (result) {
+                tip.innerHTML = '格式正确'
+                tip.style.display = 'none'
+            } else if (content === '') {
+                tip.innerHTML = '密码不能为空'
+                tip.style.display = 'inline-block'
+            } else {
+                tip.innerHTML = '密码只能输入6-20个字母、数字、下划线'
+                tip.style.display = 'inline-block'
+
+            }
+        }
+
+    </script>
+
+
+</head>
+<body>
+<div class="login_top clearfix">
+    <a href="{% url 'manage:index' %}" class="login_logo" style="font-size: 30px;">
+        <img src="/static/images/bz_logo.gif">
+        <span style="color:black;font-size: 15px;">站在时代风口，抢占人工智能</span>
+    </a>
+</div>
+
+<div class="login_form_bg">
+    <div class="login_form_wrap clearfix">
+        <div class="login_banner fl"></div>
+        <div class="slogan fl">百知教育 · 课程系统</div>
+        <div class="login_form fr">
+            <div class="login_title clearfix">
+                <h1>用户登录</h1>
+                <a href="{% url 'login:reg' %}">立即注册</a>
+            </div>
+            <div class="form_input">
+                <form class="form1">
+                    <input type="text" name="username" class="name_input" placeholder="请输入用户名"
+                           onblur='checkname1(this)'>
+                    <div class="user_error">输入错误</div>
+                    <input type="password" name="pwd" class="pass_input" placeholder="请输入密码"
+                           onblur='checkpwd1(this)'>
+                    <div class="pwd_error">输入错误</div>
+                    <div class="more_input clearfix">
+                        <input type="checkbox" name="check">
+                        <label>记住用户名</label>
+                        <a href="{% url 'login:forget_pwd' %}">忘记密码</a>
+                    </div>
+                    <input type="button" name="" value="登录" class="input_submit" onclick="submit2()">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer no-mp">
+    <div class="foot_link">
+        <a href="#">关于我们</a>
+        <span>|</span>
+        <a href="#">联系我们</a>
+        <span>|</span>
+        <a href="#">招聘人才</a>
+        <span>|</span>
+        <a href="#">友情链接</a>
+    </div>
+    <p>CopyRight © 2020 北京百知教育科技有限公司 All Rights Reserved</p>
+    <p>电话：010-****888 京ICP备*******8号</p>
+</div>
+
+</body>
+</html>

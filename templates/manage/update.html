@@ -1,0 +1,293 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css"/>
+    {#    <link rel="stylesheet" href="/static/css/home.css">#}
+    <link rel="stylesheet" href="/static/css/bodymain.css">
+    <link rel="stylesheet" href="/static/css/addArticle.css">
+    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+
+    <title>百知课程后台管理系统-修改文章</title>
+    <script src="/static/js/jquery.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/js/bootstrap.js" type="text/javascript" charset="utf-8"></script>
+
+
+    <style>
+        .course-python {
+            padding-left: 15px;
+            height: 40px;
+            line-height: 40px;
+            background-color: lightgray;
+        }
+
+        .hide_scorll {
+            max-height: 469px;
+            overflow: auto;
+        }
+
+        .hide_scorll::-webkit-scrollbar {
+            display: none
+        }
+    </style>
+
+    <script>
+
+
+        function type1(t) {
+            var sel = $("#sel1 option:selected");
+
+            sel1 = sel.text()
+            $.ajax({
+                type: 'post',
+                url: '{% url 'manage:sel2' %}',
+                data: "csrfmiddlewaretoken={{ csrf_token }}&sel=" + sel1,
+                success: function (resp) {
+                    a = $("#my-inp").val()
+                    $("#sel2").empty()
+                    for (name2 in resp) {
+                        $("#sel2").append("<option value=\"python_advanced\">" + resp[name2] + "</option>")
+                    }
+                    $("#sel2").removeAttr("disabled");
+                }
+            })
+
+        }
+
+        function tijiao() {
+            {#console.log({{ url }})#}
+            var type1 = $("#sel1 option:selected").text();
+            var type2 = $("#sel2 option:selected").text();
+            var title = document.getElementsByName('title')[0].value
+            var time = document.getElementsByName('time')[0].value
+            var content = document.getElementsByName('content')[0].value
+            var course_id = document.getElementsByName('course_id')[0].value
+            var number = document.getElementsByName('number')[0].value
+            var level = document.getElementsByName('level')[0].value
+            var id = document.getElementsByName('id')[0].value
+            if (title === '') {
+                var title111 = document.getElementsByClassName('title111')[0]
+                title111.innerHTML = '文章名称不能为空'
+                {#alert('文章名称不能为空')#}
+            } else {
+                $.ajax({
+                    type: 'post',
+                    url: '{% url 'manage:update_submit' %}',
+                    data: "csrfmiddlewaretoken={{ csrf_token }}" +
+                        '&title=' + title + '&type1=' + type1 + '&type2=' + type2
+                        + '&time=' + time + '&content=' + content + '&course_id=' + course_id
+                        + '&number=' + number + '&level=' + level,
+                    success: function (resp) {
+                        console.log(resp)
+                        if (resp === '修改成功') {
+                            {#window.location.href={{ url1 }}+'?id='#}
+                            {#    +id+'&&level='+level+'&&number='+number#}
+                            {#a = {% url 'manage:base' %}+'?id=' + id + '&&level=' + level + '&&number=' + number#}
+                            {#console.log(a)#}
+                            window.location.href = "{% url 'manage:base' %}" +'?id=' + id + '&&level=' + level + '&&number=' + number
+                        }
+                    }
+                })
+            }
+
+        }
+
+    </script>
+
+
+</head>
+<body>
+<nav class="navbar navbar-default nav-self">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">百知课程后台管理系统</a>
+        </div>
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="{% url 'manage:quit_login' %}" role="button">{{ username }} <span
+                            class="glyphicon glyphicon-log-in"></span></a>
+                </li>
+                <li>
+                    <a href="{% url 'manage:login_out' %}">退出 <span class="glyphicon glyphicon-log-out"></span></a>
+                </li>
+            </ul>
+            <form class="navbar-form navbar-right">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="">
+                </div>
+                <div class="btn-group" role="group" aria-label="...">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">
+                            <span class="glyphicon glyphicon-search"></span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="panel-group col-sm-2 left-side-bar" id="accordion" role="tablist" aria-multiselectable="true">
+            <div>
+                <div class="panel panel-default hide_scorll">
+                    <div class="panel-heading left-side-header">
+                        <a href="{% url 'manage:base' %}?id=0&&level=0">
+                            百知课程</a></div>
+                    {% for type3 in type1 %}
+
+                        <div class="course-python">
+                            <a href="{% url 'manage:base' %}?id={{ type3.id }}&&level={{ type3.level }}">{{ type3.title }}
+                            </a></div>
+
+                        {% for type4 in type2 %}
+                            {% if type4.parent_id == type3.id %}
+                                <div class="list-group">
+                                    <a href="{% url 'manage:base' %}?id={{ type4.id }}&&level={{ type4.level }}"
+                                       class="list-group-item">{{ type4.title }}</a>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+
+
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+        <div class="tab-content col-sm-10 right-side">
+            <div class="panel panel-default right-side-content">
+                <div class="page-header">
+                    <h3>修改文章</h3>
+                </div>
+                <table class="table table-bordered">
+                    <tr>
+                        <td align="center" valign="middle">文章名称：</td>
+                        <td><input type="text" class="my-inp" name="title" value="{{ title }}"/>
+                            <span class="title111"></span>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td align="center">所属课程/类别：</td>
+                        <td>
+                            <select id="sel1" name="cate_sel" class="my-sel" onchange="type1(this)">
+                                {#                                <option value="default-cate">请选择所属课程分类：</option>#}
+
+                                {% for type3 in type1 %}
+                                    {% if type3.title == tt.title %}
+                                        <option value="" name="{{ type3.title }}"
+                                                selected="selected">{{ type3.title }}</option>
+                                    {% else %}
+                                        <option value="" name="{{ type3.title }}"
+                                        >{{ type3.title }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            <select id="sel2" name="course_sel" class="my-sel" disabled="true">
+                                <option value="python_base" selected="selected" value=>{{ t1.title }}</option>
+                            </select>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" valign="middle">发布时间：</td>
+                        <td>
+                            <input id="my-inp" name="time" type="datetime-local" class="my-inp">（默认当前时间）
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center">文章内容：</td>
+                        <td><textarea id="content1" name="content" class="form-control"
+                                      rows="3">{{ content }}</textarea></td>
+                    </tr>
+                </table>
+                <div class="btn-toolbar" role="toolbar" aria-label="...">
+                    <div class="btn-group" role="group" aria-label="...">
+
+                        <button type="button" class="btn btn-default my-btn" onclick="tijiao()">
+                            <span class="glyphicon glyphicon-floppy-disk"></span>
+                            保存
+                        </button>
+                        <input type="hidden" name="course_id" value="{{ course_id }}">
+                        <input type="hidden" name="level" value="{{ level }}">
+                        <input type="hidden" name="number" value="{{ number }}">
+                        <input type="hidden" name="id" value="{{ id }}">
+
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="thumbnail">
+                    <div class="caption">
+                        <h4><span class="glyphicon glyphicon-heart-empty glyphicon"></span> 关注我们</h4>
+                        <p>最受欢迎的管理平台</p>
+                        <p><a href="#" class="ic_df"> 新浪微博</a></p>
+                        <p><a href="#" class="ic_weichat"> 官方微信</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="thumbnail">
+                    <div class="caption">
+                        <h4><span class="glyphicon glyphicon-king"> 开发平台</span></h4>
+                        <p>加入开发平台，尊享会员福利，成为资深程序猿</p>
+                        <p class="p_idea"><a href="http://www.baizhibest.com"
+                                             class="btn btn-default btn-lg idea">我要开发</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="thumbnail">
+                    <div class="caption">
+                        <h4><span class="glyphicon glyphicon-phone-alt"></span> 关于我们</h4>
+                        <p>欢迎反馈宝贵意见</p>
+                        <p class="p_idea"><a href="http://www.baizhibest.com"
+                                             class="btn btn-default btn-lg idea">意见反馈</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 cp_info">
+                <div class="no-mp">
+                    <p>CopyRight © 2020 北京百知教育科技有限公司 All Rights Reserved</p>
+                    <p>电话：010-****888 京ICP备*******8号</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var time = new Date();
+        var day = ('0' + time.getDate()).slice(-2);
+        var month = ('0' + time.getMonth()).slice(-2);
+        var hour = ('0' + time.getHours()).slice(-2);
+        var minutes = ('0' + time.getMinutes()).slice(-2);
+        var secord = ('0' + time.getSeconds()).slice(-2);
+        var today = time.getFullYear() + "-" + (month) + "-" + (day) + "T" + (hour) + ":" + (minutes) + ":" + (secord);
+        $("#my-inp").val(today);
+    })
+
+</script>
+
+</body>
+</html>
